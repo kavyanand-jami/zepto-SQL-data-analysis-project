@@ -17,7 +17,7 @@ The project simulates a real-world data analyst workflow using MySQL/PostgreSQL-
 
 ## 🗂 Dataset Description
 The dataset contains product-level details such as:
-- SKU ID
+
 - Product Name & Category
 - MRP & Discounted Price
 - Discount Percentage
