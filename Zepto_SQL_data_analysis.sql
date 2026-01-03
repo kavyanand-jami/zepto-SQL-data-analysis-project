@@ -5,7 +5,6 @@
 DROP TABLE IF EXISTS zepto;
 
 CREATE TABLE zepto (
-    sku_id SERIAL PRIMARY KEY,
     category VARCHAR(120),
     name VARCHAR(150) NOT NULL,
     mrp NUMERIC(8,2),
@@ -18,9 +17,7 @@ CREATE TABLE zepto (
 );
 
 
-🔹 3️⃣ DATA EXPLORATION SECTION (VERY IMPORTANT)
-sql
-Copy code
+🔹️ DATA EXPLORATION SECTION 
 -- =====================================================
 -- DATA EXPLORATION
 -- =====================================================
@@ -28,6 +25,26 @@ Copy code
 -- Total number of products
 SELECT COUNT(*) AS total_products
 FROM zepto;
+
+--null values
+SELECT * FROM zepto
+WHERE name IS NULL
+OR
+category IS NULL
+OR
+mrp IS NULL
+OR
+discountPercent IS NULL
+OR
+discountedSellingPrice IS NULL
+OR
+weightInGms IS NULL
+OR
+availableQuantity IS NULL
+OR
+outOfStock IS NULL
+OR
+quantity IS NULL;
 
 -- Distinct product categories
 SELECT DISTINCT category
@@ -37,23 +54,35 @@ FROM zepto;
 SELECT COUNT(*) AS out_of_stock_count
 FROM zepto
 WHERE outOfStock = TRUE;
-This shows real analyst thinking.
 
-🔹 4️⃣ BUSINESS QUESTIONS (THIS IS THE GOLD)
-This is where recruiters decide.
+--product names present multiple times
+SELECT name, COUNT(sku_id) AS "Number of SKUs"
+FROM zepto
+GROUP BY name
+HAVING count(sku_id) > 1
+ORDER BY count(sku_id) DESC;
 
-sql
-Copy code
+--data cleaning
+
+--products with price = 0
+SELECT * FROM zepto
+WHERE mrp = 0 OR discountedSellingPrice = 0;
+
+DELETE FROM zepto
+WHERE mrp = 0;
+
+--convert paise to rupees
+UPDATE zepto
+SET mrp = mrp / 100.0,
+discountedSellingPrice = discountedSellingPrice / 100.0;
+
+SELECT mrp, discountedSellingPrice FROM zepto;
+
+
+🔹️ BUSINESS QUESTIONS 
 -- =====================================================
 -- BUSINESS ANALYSIS QUERIES
 -- =====================================================
-
--- Average discount percentage by category
-SELECT category,
-       ROUND(AVG(discountPercent), 2) AS avg_discount
-FROM zepto
-GROUP BY category
-ORDER BY avg_discount DESC;
 
 -- Top 10 products by discounted selling price
 SELECT name,
@@ -62,31 +91,57 @@ FROM zepto
 ORDER BY discountedSellingPrice DESC
 LIMIT 10;
 
--- Products with high MRP but low discount
-SELECT name, mrp, discountPercent
+ --Estimated Revenue for each category
+SELECT category,
+SUM(discountedSellingPrice * availableQuantity) AS total_revenue
 FROM zepto
-WHERE mrp > 500 AND discountPercent < 5;
-🧑‍💼 Recruiter POV:
+GROUP BY category
+ORDER BY total_revenue;
 
-“These are reporting-style questions. Hireable.”
+--  products where MRP is greater than ₹500 and discount is less than 10%.
+SELECT DISTINCT name, mrp, discountPercent
+FROM zepto
+WHERE mrp > 500 AND discountPercent < 10
+ORDER BY mrp DESC, discountPercent DESC;
 
-🔹 5️⃣ INVENTORY & OPERATIONS INSIGHTS (VERY STRONG)
-sql
-Copy code
+-- top 5 categories offering the highest average discount percentage.
+SELECT category,
+ROUND(AVG(discountPercent),2) AS avg_discount
+FROM zepto
+GROUP BY category
+ORDER BY avg_discount DESC
+LIMIT 5;
+
+-- price per gram for products above 100g and sort by best value.
+SELECT DISTINCT name, weightInGms, discountedSellingPrice,
+ROUND(discountedSellingPrice/weightInGms,2) AS price_per_gram
+FROM zepto
+WHERE weightInGms >= 100
+ORDER BY price_per_gram;
+
+🔹️ INVENTORY & OPERATIONS INSIGHTS 
 -- =====================================================
 -- INVENTORY & OPERATIONS INSIGHTS
 -- =====================================================
 
--- Products with low stock
-SELECT name, availableQuantity
-FROM zepto
-WHERE availableQuantity < 10
-ORDER BY availableQuantity;
+-- Products with High MRP but Out of Stock
 
--- Categories with highest out-of-stock products
-SELECT category,
-       COUNT(*) AS out_of_stock_items
+SELECT DISTINCT name,mrp
 FROM zepto
-WHERE outOfStock = TRUE
+WHERE outOfStock = TRUE and mrp > 300
+ORDER BY mrp DESC;
+
+-- Group the products into categories like Low, Medium, Bulk.
+SELECT DISTINCT name, weightInGms,
+CASE WHEN weightInGms < 1000 THEN 'Low'
+	WHEN weightInGms < 5000 THEN 'Medium'
+	ELSE 'Bulk'
+	END AS weight_category
+FROM zepto;
+
+-- Total Inventory Weight Per Category 
+SELECT category,
+SUM(weightInGms * availableQuantity) AS total_weight
+FROM zepto
 GROUP BY category
-ORDER BY out_of_stock_items DESC;
+ORDER BY total_weight;
