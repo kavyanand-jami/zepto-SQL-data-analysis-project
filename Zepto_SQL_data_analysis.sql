@@ -56,11 +56,11 @@ FROM zepto
 WHERE outOfStock = TRUE;
 
 --product names present multiple times
-SELECT name, COUNT(sku_id) AS "Number of SKUs"
+SELECT name, COUNT(*) AS "no_of_times"
 FROM zepto
 GROUP BY name
-HAVING count(sku_id) > 1
-ORDER BY count(sku_id) DESC;
+HAVING count(*) > 1
+ORDER BY count(*) DESC;
 
 --data cleaning
 
