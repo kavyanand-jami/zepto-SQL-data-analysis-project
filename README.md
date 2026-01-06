@@ -139,25 +139,8 @@ Perform deeper analysis to support pricing optimization and inventory planning.
 
 zepto-sql-analysis/
 │
-├── dataset/
-│ └── zepto_inventory_data.csv
+├── README.md 
 │
-├── sql_queries/
-│ ├── 01_data_cleaning.sql
-│ ├── 02_eda.sql
-│ ├── 03_business_analysis.sql
-│ └── 04_advanced_analysis.sql
+├──  Zepto_SQL_data_analysis.sql
 │
-├── README.md
-
-
----
-
-## 📂 SQL File Mapping
-
-| SQL File | Questions Covered |
-|--------|------------------|
-| 01_data_cleaning.sql | Q1 – Q3 |
-| 02_eda.sql | Q4 – Q6 |
-| 03_business_analysis.sql | Q7 – Q11 |
-| 04_advanced_analysis.sql | Q12 – Q15 |
+├── zepto_inventory_data.csv
